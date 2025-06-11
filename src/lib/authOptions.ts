@@ -1,7 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
 import type { AuthOptions } from "next-auth";
 import type { JWT } from "next-auth/jwt";
-import type { Session } from "next-auth";
+import type { Session, Account } from "next-auth";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -16,14 +16,14 @@ export const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, account }: { token: JWT; account?: any }) {
+    async jwt({ token, account }: { token: JWT; account?: Account }) {
       if (account) {
         token.accessToken = account.access_token;
       }
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      // @ts-expect-error: accessToken is not typed in Session by default
+      // @ts-expect-error - adding accessToken to session
       session.accessToken = token.accessToken;
       return session;
     },
