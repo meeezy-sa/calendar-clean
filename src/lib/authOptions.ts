@@ -1,6 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
+import type { NextAuthOptions } from "next-auth";
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -20,7 +21,8 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
-      (session as any).accessToken = token.accessToken;
+      // @ts-expect-error: accessToken is not typed in Session by default
+      session.accessToken = token.accessToken;
       return session;
     },
   },
