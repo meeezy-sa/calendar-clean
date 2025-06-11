@@ -30,7 +30,7 @@ type User = {
   name: string;
   email: string;
   link?: string;
-  createdAt?: any;
+ createdAt?: string | Date;
 };
 
 export default function UserCalendarPage() {

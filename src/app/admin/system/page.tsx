@@ -17,7 +17,7 @@ type User = {
   name?: string;
   email?: string;
   link?: string;
-  createdAt?: any;
+createdAt?: string | Date;
 };
 
 type Booking = {
