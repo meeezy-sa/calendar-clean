@@ -10,14 +10,13 @@ import {
 } from 'firebase/firestore';
 import { useSession } from 'next-auth/react';
 
-export default function SystemAdminPage() {
-  const { data: session, status } = useSession();
 type User = {
   id?: string;
   name?: string;
   email?: string;
   link?: string;
-createdAt?: string | Date;
+  username?: string;
+  createdAt?: string | Date;
 };
 
 type Booking = {
@@ -30,8 +29,10 @@ type Booking = {
   status?: string;
 };
 
-const [users, setUsers] = useState<User[]>([]);
-const [bookings, setBookings] = useState<Booking[]>([]);
+export default function SystemAdminPage() {
+  const { data: session, status } = useSession();
+  const [users, setUsers] = useState<User[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [search, setSearch] = useState('');
   const [sortDesc, setSortDesc] = useState(true);
 
@@ -56,7 +57,7 @@ const [bookings, setBookings] = useState<Booking[]>([]);
     setBookings(bookingsData);
   };
 
-  const getUserBookingsCount = (email: string) => {
+  const getUserBookingsCount = (email: string = '') => {
     return bookings.filter(b => b.email === email).length;
   };
 
@@ -66,13 +67,13 @@ const [bookings, setBookings] = useState<Booking[]>([]);
   };
 
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(search.toLowerCase()) ||
-    user.email.toLowerCase().includes(search.toLowerCase())
+    (user.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+    (user.email ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   const sortedUsers = filteredUsers.sort((a, b) => {
-    const countA = getUserBookingsCount(a.email);
-    const countB = getUserBookingsCount(b.email);
+    const countA = getUserBookingsCount(a.email ?? '');
+    const countB = getUserBookingsCount(b.email ?? '');
     return sortDesc ? countB - countA : countA - countB;
   });
 
@@ -115,7 +116,7 @@ const [bookings, setBookings] = useState<Booking[]>([]);
               <td className="border px-4 py-2">{user.name}</td>
               <td className="border px-4 py-2">{user.email}</td>
               <td className="border px-4 py-2">{user.username}</td>
-              <td className="border px-4 py-2">{getUserBookingsCount(user.email)}</td>
+              <td className="border px-4 py-2">{getUserBookingsCount(user.email ?? '')}</td>
               <td className="border px-4 py-2">
                 <a
                   href={`/u/${user.username}`}
@@ -127,7 +128,7 @@ const [bookings, setBookings] = useState<Booking[]>([]);
               </td>
               <td className="border px-4 py-2">
                 <button
-                  onClick={() => handleDelete(user.id)}
+                  onClick={() => handleDelete(user.id!)}
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                 >
                   🗑 Delete
