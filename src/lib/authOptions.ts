@@ -1,8 +1,9 @@
+// src/lib/authOptions.ts
 import GoogleProvider from "next-auth/providers/google";
-import type { NextAuthOptions, Session, Account, User } from "next-auth";
+import type { Session, Account, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
