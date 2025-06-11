@@ -1,9 +1,9 @@
 import GoogleProvider from "next-auth/providers/google";
-import type { AuthOptions } from "next-auth";
-import type { JWT } from "next-auth/jwt";
+import type { NextAuthOptions } from "next-auth";
 import type { Session, Account } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 
-export const authOptions: AuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -23,8 +23,7 @@ export const authOptions: AuthOptions = {
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      // @ts-expect-error - adding accessToken to session
-      session.accessToken = token.accessToken;
+      (session as any).accessToken = token.accessToken;
       return session;
     },
   },
