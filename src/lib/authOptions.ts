@@ -1,3 +1,5 @@
+// ✅ Final version of src/lib/authOptions.ts
+
 import GoogleProvider from "next-auth/providers/google";
 import type { AuthOptions } from "next-auth";
 
