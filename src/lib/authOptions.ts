@@ -20,10 +20,10 @@ export const authOptions: AuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
-      session.accessToken = token.accessToken;
-      return session;
-    },
+   async session({ session, token }) {
+  (session as any).accessToken = token.accessToken;
+  return session;
+},
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
