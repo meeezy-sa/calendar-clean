@@ -27,6 +27,20 @@ export default function SignupPage() {
     try {
       await addDoc(collection(db, 'users'), userData);
       console.log("✅ User saved:", userData);
+
+      // ⬇️ NEW: Send signup email
+      await fetch('/api/send-signup-link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          link: `/u/${username}`,
+        }),
+      });
+
       setSubmitted(true);
     } catch (err) {
       console.error("❌ Error saving user:", err);
