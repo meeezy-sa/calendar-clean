@@ -16,18 +16,28 @@ import {
   addDays,
 } from 'date-fns';
 
+type Booking = {
+  id?: string;
+  name: string;
+  email: string;
+  subject: string;
+  date: string;
+  hour: number;
+  status: string;
+};
+
+type User = {
+  name: string;
+  email: string;
+  link?: string;
+  createdAt?: any;
+};
+
 export default function UserCalendarPage() {
   const params = useParams();
   const username = params?.username as string;
-  const [user, setUser] = useState<any>(null);
-  const [bookings, setBookings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedSlot, setSelectedSlot] = useState<{ date: string; hour: number } | null>(null);
-  const [formData, setFormData] = useState({ name: '', email: '', subject: '' });
-  const [submitted, setSubmitted] = useState(false);
-
-  const hours = Array.from({ length: 10 }, (_, i) => 9 + i);
-  const days = Array.from({ length: 7 }, (_, i) =>
+  const [user, setUser] = useState<User | null>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
     addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), i)
   );
 

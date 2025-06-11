@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     },
     body: JSON.stringify({
       from: "Majid Booking <booking@meeezy.com>",
-      to: "mmofaiz@gmail.com", // ⚠️ حالياً ترسل لنفسك
+      to: email, // ✅ نستخدم الإيميل القادم من الحجز
       subject: `📢 Booking ${status === 'accepted' ? 'Accepted' : 'Declined'}`,
       html,
     }),

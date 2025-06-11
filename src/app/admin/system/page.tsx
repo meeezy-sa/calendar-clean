@@ -12,8 +12,26 @@ import { useSession } from 'next-auth/react';
 
 export default function SystemAdminPage() {
   const { data: session, status } = useSession();
-  const [users, setUsers] = useState<any[]>([]);
-  const [bookings, setBookings] = useState<any[]>([]);
+type User = {
+  id?: string;
+  name?: string;
+  email?: string;
+  link?: string;
+  createdAt?: any;
+};
+
+type Booking = {
+  id?: string;
+  name?: string;
+  email?: string;
+  subject?: string;
+  date?: string;
+  hour?: number;
+  status?: string;
+};
+
+const [users, setUsers] = useState<User[]>([]);
+const [bookings, setBookings] = useState<Booking[]>([]);
   const [search, setSearch] = useState('');
   const [sortDesc, setSortDesc] = useState(true);
 
