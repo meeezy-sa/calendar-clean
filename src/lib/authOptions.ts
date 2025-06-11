@@ -18,7 +18,6 @@ export const authOptions: NextAuthOptions = {
     async jwt({
       token,
       account,
-      user,
     }: {
       token: JWT;
       account?: Account | null;
