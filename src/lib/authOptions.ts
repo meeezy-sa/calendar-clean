@@ -20,7 +20,7 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
-      // @ts-expect-error
+      // @ts-expect-error accessToken is custom added to session object
       session.accessToken = token.accessToken;
       return session;
     },
