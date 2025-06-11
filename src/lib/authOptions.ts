@@ -23,9 +23,7 @@ export const authOptions: NextAuthOptions = {
       account?: Account | null;
       user?: User;
     }) {
-      if (account) {
-        token.accessToken = account.access_token;
-      }
+      if (account) token.accessToken = account.access_token;
       return token;
     },
     async session({
