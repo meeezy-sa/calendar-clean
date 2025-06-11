@@ -1,5 +1,5 @@
 import GoogleProvider from "next-auth/providers/google";
-import type { NextAuthOptions, Session, Account, User } from "next-auth";
+import type { NextAuthOptions, Session, Account, User } from "next-auth/react";
 import type { JWT } from "next-auth/jwt";
 
 export const authOptions: NextAuthOptions = {
