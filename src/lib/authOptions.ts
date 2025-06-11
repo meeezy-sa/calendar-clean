@@ -1,8 +1,8 @@
 import GoogleProvider from "next-auth/providers/google";
-import type { AuthOptions, Session, Account, User } from "next-auth";
+import type { NextAuthOptions, Session, Account, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 
-export const authOptions: AuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -18,6 +18,7 @@ export const authOptions: AuthOptions = {
     async jwt({
       token,
       account,
+      user,
     }: {
       token: JWT;
       account?: Account | null;
