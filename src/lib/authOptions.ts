@@ -1,5 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
 import type { NextAuthOptions } from "next-auth";
+import type { JWT } from "next-auth/jwt";
+import type { Session } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -18,10 +20,10 @@ export const authOptions: NextAuthOptions = {
       token,
       account,
     }: {
-      token: any;
+      token: JWT;
       account?: { access_token?: string };
-    }) {
-      if (account) {
+    }): Promise<JWT> {
+      if (account?.access_token) {
         token.accessToken = account.access_token;
       }
       return token;
@@ -30,12 +32,13 @@ export const authOptions: NextAuthOptions = {
       session,
       token,
     }: {
-      session: any;
-      token: any;
-    }) {
-      // @ts-expect-error accessToken is custom added to session object
-      session.accessToken = token.accessToken;
-      return session;
+      session: Session;
+      token: JWT;
+    }): Promise<Session> {
+      return {
+        ...session,
+        accessToken: token.accessToken as string,
+      };
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
