@@ -19,6 +19,7 @@ export async function POST(req: Request) {
       <li><strong>Subject:</strong> ${subject}</li>
     </ul>
     <p>If you have any questions, feel free to reach out.</p>
+    <p style="color: #999; font-size: 12px;">Sent by meeezy.com</p>
   `;
 
   const res = await fetch("https://api.resend.com/emails", {
@@ -28,15 +29,15 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "Majid Booking <booking@meeezy.com>",
-      to: email, // ✅ نستخدم الإيميل القادم من الحجز
+      from: "Meeezzy Booking <booking@meeezy.com>",
+      to: email, // ✅ Dynamic recipient
       subject: `📢 Booking ${status === 'accepted' ? 'Accepted' : 'Declined'}`,
       html,
     }),
   });
 
   const result = await res.json();
-  console.log("📤 Status email sent:", result);
+  console.log("📤 Status email sent to:", email, result);
 
   return NextResponse.json({ success: true });
 }
