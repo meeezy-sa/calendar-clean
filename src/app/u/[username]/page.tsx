@@ -55,8 +55,8 @@ export default function UserCalendarPage() {
         const qUser = query(collection(db, 'users'), where('username', '==', username));
         const snapshotUser = await getDocs(qUser);
         if (!snapshotUser.empty) {
-          const userData = snapshotUser.docs[0].data();
-          setUser(userData);
+const userData = snapshotUser.docs[0].data() as User;
+setUser(userData);
 
           const qBookings = query(
             collection(db, 'bookings'),
