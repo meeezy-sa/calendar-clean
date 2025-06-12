@@ -26,7 +26,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, result });
-  } catch (error) {
+  } catch (err) {
+    console.error('❌ Email failed:', err); // ✅ log it to avoid "unused" lint error
     return NextResponse.json({ error: 'Email failed to send' }, { status: 500 });
   }
 }
