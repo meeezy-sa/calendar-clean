@@ -2,8 +2,8 @@ import './globals.css';
 import ClientSessionProvider from '@/components/ClientSessionProvider';
 
 export const metadata = {
-  title: 'Calendar Booking App',
-  description: 'MVP by Majid',
+  title: 'Meeezy — Book Meetings Without Back-and-Forth',
+  description: 'Meeezy lets you share your calendar availability and receive booking requests — simple, fast, and private.',
 };
 
 export default function RootLayout({
