@@ -1,100 +1,193 @@
+// src/app/u/[username]/page.tsx
 'use client';
 
-import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import {
   collection,
   getDocs,
   query,
   where,
-  Timestamp,
 } from 'firebase/firestore';
+import {
+  addDays,
+  format,
+  startOfToday,
+} from 'date-fns';
 
 interface Booking {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
   date: string;
   hour: number;
   status: string;
 }
 
-interface UserData {
+interface User {
   name: string;
   email: string;
-  username: string;
-  createdAt: Timestamp;
 }
 
-export default function UserPage() {
-  const { username } = useParams();
-  const [user, setUser] = useState<UserData | null>(null);
+export default function PublicBookingPage() {
+  const params = useParams();
+  const username = params?.username as string;
+
+  const [user, setUser] = useState<User | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [selected, setSelected] = useState<{ date: string; hour: number } | null>(null);
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '' });
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const today = startOfToday();
+  const days = Array.from({ length: 7 }, (_, i) => addDays(today, i));
+  const hours = Array.from({ length: 10 }, (_, i) => 9 + i);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const q = query(collection(db, 'users'), where('username', '==', username));
-      const snapshot = await getDocs(q);
-      if (!snapshot.empty) {
-        setUser(snapshot.docs[0].data() as UserData);
+      const qUser = query(collection(db, 'users'), where('username', '==', username));
+      const snapshotUser = await getDocs(qUser);
+      if (!snapshotUser.empty) {
+        const userData = snapshotUser.docs[0].data() as User;
+        setUser(userData);
+
+        const qBookings = query(
+          collection(db, 'bookings'),
+          where('email', '==', userData.email),
+          where('status', '==', 'accepted')
+        );
+        const snapshotBookings = await getDocs(qBookings);
+        const bookingData = snapshotBookings.docs.map(doc => doc.data()) as Booking[];
+        setBookings(bookingData);
       }
+      setLoading(false);
     };
-    fetchUser();
+    if (username) fetchUser();
   }, [username]);
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      if (user?.email) {
-        const q = query(collection(db, 'bookings'), where('email', '==', user.email));
-        const snapshot = await getDocs(q);
-        const data = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Booking[];
-        setBookings(data);
-      }
-    };
-    fetchBookings();
-  }, [user]);
+  const isBusy = (date: string, hour: number) => {
+    return bookings.some(b => b.date === date && b.hour === hour);
+  };
 
+  const handleSubmit = async () => {
+    if (!selected || !user) return;
+    const booking = {
+      ...formData,
+      date: selected.date,
+      hour: selected.hour,
+      status: 'pending',
+    };
+    try {
+      await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...booking, to: user.email }),
+      });
+    } catch (err) {
+      console.error('Email error', err);
+    }
+    setSubmitted(true);
+  };
+
+  if (loading) return <p className="p-6">Loading...</p>;
   if (!user) return <p className="p-6">User not found.</p>;
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">
-          {user.name}&apos;s Public Booking Page
-        </h1>
+    <div className="min-h-screen p-6 bg-white">
+      <h1 className="text-2xl font-bold mb-2">
+        {user.name}&apos;s Booking Page
+      </h1>
+      <p className="mb-4 text-gray-600">Email: {user.email}</p>
 
-        <div className="bg-white rounded shadow p-4">
-          {bookings.length === 0 ? (
-            <p className="text-gray-600">No booking slots available yet.</p>
-          ) : (
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-100 text-left">
-                <tr>
-                  <th className="py-2 px-4">Name</th>
-                  <th className="py-2 px-4">Date</th>
-                  <th className="py-2 px-4">Hour</th>
-                  <th className="py-2 px-4">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map(b => (
-                  <tr key={b.id} className="border-t">
-                    <td className="py-2 px-4">{b.name}</td>
-                    <td className="py-2 px-4">{b.date}</td>
-                    <td className="py-2 px-4">{b.hour}:00</td>
-                    <td className="py-2 px-4">{b.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+      <table className="w-full text-sm border border-black mb-4">
+        <thead>
+          <tr>
+            <th className="border px-2 py-1">Time</th>
+            {days.map((day, i) => (
+              <th key={i} className="border px-2 py-1">
+                {format(day, 'EEE dd')}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {hours.map(hour => (
+            <tr key={hour}>
+              <td className="border px-2 py-1 text-center">{hour}:00</td>
+              {days.map((day, i) => {
+                const dateStr = format(day, 'yyyy-MM-dd');
+                const busy = isBusy(dateStr, hour);
+                return (
+                  <td
+                    key={i}
+                    className={`border px-2 py-1 text-center cursor-pointer ${
+                      busy ? 'bg-red-200 text-red-700' : 'hover:bg-green-100'
+                    }`}
+                    onClick={() => {
+                      if (!busy) {
+                        setSelected({ date: dateStr, hour });
+                        setSubmitted(false);
+                      }
+                    }}
+                  >
+                    {busy ? 'Busy' : 'Free'}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {selected && !submitted && (
+        <div className="max-w-md bg-gray-100 p-4 rounded">
+          <h2 className="text-lg font-semibold mb-2">Request Booking</h2>
+          <p className="mb-2 text-gray-600">
+            {selected.date} at {selected.hour}:00
+          </p>
+
+          <input
+            type="text"
+            placeholder="Your Name"
+            value={formData.name}
+            onChange={e => setFormData({ ...formData, name: e.target.value })}
+            className="w-full border px-2 py-1 mb-2"
+          />
+          <input
+            type="email"
+            placeholder="Your Email"
+            value={formData.email}
+            onChange={e => setFormData({ ...formData, email: e.target.value })}
+            className="w-full border px-2 py-1 mb-2"
+          />
+          <input
+            type="text"
+            placeholder="Subject of Discussion"
+            value={formData.subject}
+            onChange={e => setFormData({ ...formData, subject: e.target.value })}
+            className="w-full border px-2 py-1 mb-2"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={handleSubmit}
+              className="bg-blue-600 text-white px-4 py-1 rounded"
+            >
+              Send
+            </button>
+            <button
+              onClick={() => setSelected(null)}
+              className="text-gray-600 px-4 py-1 border rounded"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {submitted && (
+        <p className="mt-4 text-green-600 font-medium">
+          ✅ Your request has been sent!
+        </p>
+      )}
     </div>
   );
 }

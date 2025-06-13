@@ -1,9 +1,10 @@
 // src/lib/authOptions.ts
+
 import GoogleProvider from "next-auth/providers/google";
-import type { Session, Account, User } from "next-auth";
+import type { NextAuthOptions, Session, Account, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -24,9 +25,12 @@ export const authOptions = {
       account?: Account | null;
       user?: User;
     }) {
-      if (account) token.accessToken = account.access_token;
+      if (account) {
+        token.accessToken = account.access_token;
+      }
       return token;
     },
+
     async session({
       session,
       token,
