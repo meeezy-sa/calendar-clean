@@ -9,16 +9,11 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   const data = await req.json();
-  const { name, email, subject, date, hour } = data;
+  const { name, email, subject, date, hour, username } = data;
 
-  const ownerQuery = query(collection(db, 'users'), where('email', '!=', email));
+  const ownerQuery = query(collection(db, 'users'), where('username', '==', username));
   const snapshot = await getDocs(ownerQuery);
-  const owner = snapshot.docs.find(doc => {
-    const user = doc.data();
-    const username = user.username?.toLowerCase().trim();
-    const target = data.username?.toLowerCase().trim();
-    return username === target;
-  })?.data();
+  const owner = snapshot.docs[0]?.data();
 
   const userMessage = `
     <p>Hi <strong>${name}</strong>,</p>
@@ -37,7 +32,6 @@ export async function POST(req: Request) {
   `;
 
   try {
-    // ✅ Send email to requester
     await resend.emails.send({
       from: 'Meeezy <booking@meeezy.com>',
       to: [email],
@@ -45,7 +39,6 @@ export async function POST(req: Request) {
       html: userMessage,
     });
 
-    // ✅ Send email to owner
     if (owner?.email) {
       await resend.emails.send({
         from: 'Meeezy <booking@meeezy.com>',
@@ -56,7 +49,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Email failed to send' }, { status: 500 });
   }
 }
